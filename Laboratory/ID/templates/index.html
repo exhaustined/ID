@@ -1,3 +1,92 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>QR Code Scanner</title>-->
+<!--    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>-->
+<!--    <script src="https://cdn.tailwindcss.com"></script>-->
+<!--</head>-->
+<!--<body>-->
+<!--    <center>-->
+<!--    <h1>idStore</h1>-->
+<!--    <input type="file" id="qr-input" accept="image/*">-->
+<!--    <button onclick="scanQR()">Scan QR Code</button>-->
+<!--    <div id="result"></div>-->
+<!--    </center>-->
+
+<!--    <script>-->
+<!--        // Function to get CSRF token from cookies-->
+<!--        function getCookie(name) {-->
+<!--            let cookieValue = null;-->
+<!--            if (document.cookie && document.cookie !== '') {-->
+<!--                const cookies = document.cookie.split(';');-->
+<!--                for (let i = 0; i < cookies.length; i++) {-->
+<!--                    const cookie = cookies[i].trim();-->
+<!--                    // Does this cookie string begin with the name we want?-->
+<!--                    if (cookie.substring(0, name.length + 1) === (name + '=')) {-->
+<!--                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));-->
+<!--                        break;-->
+<!--                    }-->
+<!--                }-->
+<!--            }-->
+<!--            return cookieValue;-->
+<!--        }-->
+
+<!--        const csrftoken = getCookie('csrftoken');-->
+
+<!--        function calculateAge(dob) {-->
+<!--            const birthDate = new Date(dob);-->
+<!--            const today = new Date();-->
+<!--            let age = today.getFullYear() - birthDate.getFullYear();-->
+<!--            const monthDifference = today.getMonth() - birthDate.getMonth();-->
+<!--            if (monthDifference < 0 || (monthDifference === 0 && today.getDate() < birthDate.getDate())) {-->
+<!--                age&#45;&#45;;-->
+<!--            }-->
+<!--            return age;-->
+<!--        }-->
+
+<!--        function scanQR() {-->
+<!--            var input = document.getElementById('qr-input');-->
+<!--            var file = input.files[0];-->
+<!--            var formData = new FormData();-->
+<!--            formData.append('qrcodeimage', file);-->
+
+<!--            $.ajax({-->
+<!--                url: '/scan_qr/',-->
+<!--                type: 'POST',-->
+<!--                data: formData,-->
+<!--                processData: false,-->
+<!--                contentType: false,-->
+<!--                beforeSend: function(xhr, settings) {-->
+<!--                    xhr.setRequestHeader("X-CSRFToken", csrftoken);-->
+<!--                },-->
+<!--                success: function(response) {-->
+<!--                    var resultDiv = document.getElementById('result');-->
+<!--                    if (response.status === 'verified') {-->
+<!--                        const age = calculateAge(response.data.date_of_birth);-->
+<!--                        console.log(response.data)-->
+<!--                        resultDiv.innerHTML = '<h2>Verified</h2>' +-->
+<!--                            '<p>ID: ' + response.data.id_number + '</p>' +-->
+<!--                            '<p>Name: ' + response.data.name + '</p>' +-->
+<!--                            '<p>Age: ' + age + '</p>' +-->
+<!--                            '<p>Place of birth: ' + response.data.place_of_birth + '</p>' +-->
+<!--                            '<p>Sex: ' + response.data.field_gender + '</p>' +-->
+<!--                            '<p>Address: ' + response.data.field_permanent_address + '</p>' +-->
+<!--                            '<p>Marital Status: ' + response.data.field_marital_status + '</p>';-->
+<!--                    } else {-->
+<!--                        resultDiv.innerHTML = '<h2>Error</h2><p>' + response.message + '</p>';-->
+<!--                    }-->
+<!--                },-->
+<!--                error: function() {-->
+<!--                    document.getElementById('result').innerHTML = '<h2>Error</h2><p>An error occurred while processing the request.</p>';-->
+<!--                }-->
+<!--            });-->
+<!--        }-->
+<!--    </script>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,13 +96,17 @@
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
-<body>
-    <center>
-    <h1>idStore</h1>
-    <input type="file" id="qr-input" accept="image/*">
-    <button onclick="scanQR()">Scan QR Code</button>
-    <div id="result"></div>
-    </center>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <div class="bg-white shadow-lg rounded-lg p-8 max-w-md w-full">
+        <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">idStore</h1>
+        <div class="flex flex-col items-center">
+            <input type="file" id="qr-input" accept="image/*" class="mb-4 p-2 border border-gray-300 rounded">
+            <button onclick="scanQR()" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300">
+                Scan QR Code
+            </button>
+            <div id="result" class="mt-6 text-center"></div>
+        </div>
+    </div>
 
     <script>
         // Function to get CSRF token from cookies
@@ -66,23 +159,24 @@
                     if (response.status === 'verified') {
                         const age = calculateAge(response.data.date_of_birth);
                         console.log(response.data)
-                        resultDiv.innerHTML = '<h2>Verified</h2>' +
-                            '<p>ID: ' + response.data.id_number + '</p>' +
-                            '<p>Name: ' + response.data.name + '</p>' +
-                            '<p>Age: ' + age + '</p>' +
-                            '<p>Place of birth: ' + response.data.place_of_birth + '</p>' +
-                            '<p>Sex: ' + response.data.field_gender + '</p>' +
-                            '<p>Address: ' + response.data.field_permanent_address + '</p>' +
-                            '<p>Marital Status: ' + response.data.field_marital_status + '</p>';
+                        resultDiv.innerHTML = '<h2 class="text-green-600 font-bold">Verified</h2>' +
+                            '<p><strong>ID:</strong> ' + response.data.id_number + '</p>' +
+                            '<p><strong>Name:</strong> ' + response.data.name + '</p>' +
+                            '<p><strong>Age:</strong> ' + age + '</p>' +
+                            '<p><strong>Place of birth:</strong> ' + response.data.place_of_birth + '</p>' +
+                            '<p><strong>Sex:</strong> ' + response.data.field_gender + '</p>' +
+                            '<p><strong>Address:</strong> ' + response.data.field_permanent_address + '</p>' +
+                            '<p><strong>Marital Status:</strong> ' + response.data.field_marital_status + '</p>';
                     } else {
-                        resultDiv.innerHTML = '<h2>Error</h2><p>' + response.message + '</p>';
+                        resultDiv.innerHTML = '<h2 class="text-red-600 font-bold">Error</h2><p>' + response.message + '</p>';
                     }
                 },
                 error: function() {
-                    document.getElementById('result').innerHTML = '<h2>Error</h2><p>An error occurred while processing the request.</p>';
+                    document.getElementById('result').innerHTML = '<h2 class="text-red-600 font-bold">Error</h2><p>An error occurred while processing the request.</p>';
                 }
             });
         }
     </script>
 </body>
 </html>
+
