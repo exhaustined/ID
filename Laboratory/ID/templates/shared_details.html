@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shared Data</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex flex-col items-center min-h-screen">
+    <div class="bg-white shadow-lg rounded-lg p-8 mt-10 max-w-3xl w-full">
+        <h1 class="text-3xl font-bold text-center mb-6 text-blue-600">Shared Data</h1>
+        {% for detail in shared_details %}
+            <div class="bg-blue-100 p-4 mb-4 rounded">
+                <h2 class="text-xl font-bold">{{ detail.company_name }}</h2>
+                <p>{{ detail.shared_data_string }}</p>
+            </div>
+        {% endfor %}
+        <div class="flex justify-between mt-10">
+            <a href="#" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300">Shared Details</a>
+            <a href="#" class="bg-blue-600 text-white py-2 px-4 rounded hover:bg-blue-700 transition duration-300">Requests</a>
+        </div>
+    </div>
+</body>
+</html>
