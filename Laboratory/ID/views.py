@@ -1,14 +1,20 @@
 from django.shortcuts import render, HttpResponse
-import qrtools
 from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-import qrcode
+
 import cv2
 import numpy as np
 from pyzbar.pyzbar import decode
 import json
 import requests
-from .models import SharedDetails
+
+from rest_framework import viewsets, status
+from rest_framework.decorators import api_view
+from rest_framework.response import Response
+from django.views.decorators.csrf import csrf_exempt
+
+from .models import Request, SharedDetails
+from .serializers import RequestSerializer, SharedDetailsSerializer
+
 # Create your views here.
 @csrf_exempt
 def index(request):
@@ -60,24 +66,31 @@ def shared_details(request):
 @csrf_exempt
 def request_data_api(request):
     if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            company_name = data.get('company_name')
-            requested_details = data.get('requested_details')
+        serializer = RequestSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response({'success': 'Request submitted successfully.'}, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-            # Validate required fields
-            if not company_name or not requested_details:
-                return JsonResponse({'error': 'Invalid request.'}, status=400)
+def requests_page(request):
+    requests = Request.objects.all()
+    return render(request, 'requests.html', {'requests': requests})
 
-            # Create request object
-            request_obj = Request.objects.create(
-                company_name=company_name,
-                requested_details=requested_details
-            )
+@api_view(['PATCH'])
+def handle_request_action(request, pk):
+    try:
+        request_instance = Request.objects.get(pk=pk)
+    except Request.DoesNotExist:
+        return Response({'error': 'Request not found'}, status=status.HTTP_404_NOT_FOUND)
 
-            return JsonResponse({'success': 'Request submitted successfully.'}, status=201)
-
-        except json.JSONDecodeError:
-            return JsonResponse({'error': 'Invalid JSON format.'}, status=400)
-
-    return JsonResponse({'error': 'Only POST requests are allowed.'}, status=405)
+    action = request.data.get('action')
+    if action == 'approve':
+        shared_data = {detail: True for detail in request_instance.requested_details.split(',')}
+        SharedDetails.objects.create(company_name=request_instance.company_name, shared_data=shared_data)
+        request_instance.delete()
+        return Response({'success': 'Request approved and details shared.'}, status=status.HTTP_200_OK)
+    elif action == 'deny':
+        request_instance.delete()
+        return Response({'success': 'Request denied.'}, status=status.HTTP_200_OK)
+    else:
+        return Response({'error': 'Invalid action'}, status=status.HTTP_400_BAD_REQUEST)
